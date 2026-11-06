@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="kk" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ұлы дала құпиясы: Найман, Керейт, Жалайыр</title>
+    <!-- Tailwind CSS -->
+    
+    <!-- FontAwesome Icons -->
+    
+    <!-- Google Fonts -->
+    
+    <!-- Tone.js for sound effects -->
+    
+    <script>window.tailwind={};window.Tone={context:{state:"running"},start:()=>Promise.resolve(),Synth:class{},PolySynth:class{constructor(){this.volume={value:-6}}toDestination(){return this}triggerAttackRelease(notes,d){try{const a=window.audioCtx||(window.audioCtx=new(window.AudioContext||window.webkitAudioContext)());a.resume();notes.forEach(n=>{const m=/^([A-G])(#?)(\d)$/.exec(n),v={C:-9,D:-7,E:-5,F:-4,G:-2,A:0,B:2}[m[1]]+(m[2]?1:0)+(Number(m[3])-4)*12,o=a.createOscillator(),g=a.createGain();o.frequency.value=440*Math.pow(2,v/12);o.connect(g);g.connect(a.destination);g.gain.setValueAtTime(.04,a.currentTime);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+.2);o.start();o.stop(a.currentTime+.22)})}catch(e){}}}};</script><script>
+        // Define navigation & sound logic globally
+        window.currentStage = 1;
+        window.totalStages = 9;
+        window.userScore = 0;
+
+        window.playAudioEffect = function(type) {
+            try {
+                if (Tone.context.state !== 'running') {
+                    Tone.start();
+                }
+                const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+                synth.volume.value = -6;
+
+                if (type === 'correct') {
+                    synth.triggerAttackRelease(["C5", "E5", "G5"], "8n");
+                } else if (type === 'wrong') {
+                    synth.triggerAttackRelease(["C3", "F#3"], "8n");
+                } else if (type === 'nav') {
+                    synth.triggerAttackRelease(["G4", "C5"], "16n");
+                } else if (type === 'feedback') {
+                    synth.triggerAttackRelease(["E5", "A5"], "8n");
+                }
+            } catch(e) {
+                console.log('Audio playback initialized:', e);
+            }
+        };
+
+        window.goToStage = function(stageNum) {
+            if (stageNum < 1 || stageNum > window.totalStages) return;
+            window.playAudioEffect('nav');
+            window.currentStage = stageNum;
+
+            for (let i = 1; i <= window.totalStages; i++) {
+                const stageEl = document.getElementById(`stage-${i}`);
+                if (stageEl) {
+                    stageEl.classList.add('hidden');
+                }
+            }
+
+            const activeStage = document.getElementById(`stage-${stageNum}`);
+            if (activeStage) {
+                activeStage.classList.remove('hidden');
+            }
+
+            window.updateStagePills();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        window.updateStagePills = function() {
+            const container = document.getElementById('stage-pills');
+            if (!container) return;
+            container.innerHTML = '';
+            for (let i = 1; i <= window.totalStages; i++) {
+                const btn = document.createElement('button');
+                btn.className = `px-3 py-1 text-xs rounded-full font-semibold transition ${
+                    i === window.currentStage 
+                        ? 'bg-amber-500 text-slate-950 shadow-md font-extrabold' 
+                        : 'bg-slate-800 text-amber-200 hover:bg-slate-700'
+                }`;
+                btn.innerText = `${i}-кезең`;
+                btn.onclick = () => window.goToStage(i);
+                container.appendChild(btn);
+            }
+        };
+
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        steppe: {
+                            gold: '#F59E0B',
+                            amber: '#D97706',
+                            dark: '#0F172A',
+                            card: '#1E293B'
+                        }
+                    },
+                    fontFamily: {
+                        title: ['Cinzel', 'serif'],
+                        sans: ['Montserrat', 'sans-serif']
+                    }
+                }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            window.updateStagePills();
+            window.renderQuiz();
+        });
+
+        // Quiz Questions Data for Stage 8
+        const quizData = [
+            {
+                q: "1. Найман сөзі моңғол тілінен аударғанда нені білдіреді?",
+                options: ["Сегіз", "Бес", "Он", "Үш"],
+                answer: 0
+            },
+            {
+                q: "2. Керейт хандығының астанасы қай қала/мекен болды?",
+                options: ["Балықты", "Битөбе", "Түркістан", "Отырар"],
+                answer: 1
+            },
+            {
+                q: "3. Найман, Керейт, Жалайыр тайпалары қай ғасырларда өмір сүрді?",
+                options: ["V-VI ғғ.", "XI-XII ғғ.", "XVIII-XIX ғғ.", "XX ғасыр"],
+                answer: 1
+            },
+            {
+                q: "4. Бұл тайпалар арасында ислам дінімен қатар кең тараған діни бағыт?",
+                options: ["Буддизм", "Несториан христиандығы", "Индуизм", "Католицизм"],
+                answer: 1
+            },
+            {
+                q: "5. Найман хандығының соңғы билеушісі Күшлік хан қай өңірге қашып барды?",
+                options: ["Жетісуға", "Еділ бойына", "Қырымға", "Карпатыға"],
+                answer: 0
+            },
+            {
+                q: "6. Найман мен Керейт мемлекеттері ресми іс-қағаздарында қандай жазуды қолданды?",
+                options: ["Араб жазуы", "Көне ұйғыр жазуы", "Латын әліпбиі", "Кириллица"],
+                answer: 1
+            },
+            {
+                q: "7. Керейттердің әйгілі билеушісі, Шыңғыс ханның өкіл әкесі атанған кім?",
+                options: ["Торы хан (Уаң хан)", "Күшлік хан", "Наркеш Дайын", "Білге қаған"],
+                answer: 0
+            },
+            {
+                q: "8. Жалайыр тайпасы негізінен қай өзендердің бойын мекендеді?",
+                options: ["Сырдария мен Әмудария", "Орхон мен Селенга", "Еділ мен Жайық", "Ертіс мен Есіл"],
+                answer: 1
+            },
+            {
+                q: "9. Найман мемлекетінің астанасы қай қала болды?",
+                options: ["Балықты", "Битөбе", "Сығанақ", "Сарайшық"],
+                answer: 0
+            },
+            {
+                q: "10. XIII ғасырдың басында бұл тайпаларды өзіне бағындырған қолбасшы?",
+                options: ["Ақсақ Темір", "Шыңғыс хан", "Батый хан", "Аттила"],
+                answer: 1
+            }
+        ];
+
+        window.currentQuizIdx = 0;
+        window.userQuizAnswers = {};
+
+        window.renderQuiz = function() {
+            const container = document.getElementById('stage-8-quiz');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const item = quizData[window.currentQuizIdx];
+            const answeredOption = window.userQuizAnswers[window.currentQuizIdx];
+
+            const card = document.createElement('div');
+            card.className = 'bg-slate-900/95 p-6 md:p-8 rounded-2xl border-2 border-amber-500/50 space-y-6 shadow-2xl';
+            
+            let html = `
+                <div class="flex justify-between items-center border-b border-amber-500/30 pb-4">
+                    <span class="text-sm font-bold px-4 py-1.5 bg-amber-500/20 text-amber-300 rounded-full border border-amber-500/50">
+                        Сұрақ ${window.currentQuizIdx + 1} / ${quizData.length}
+                    </span>
+                    <span class="text-xs md:text-sm text-sky-200 font-medium">Дұрыс жауап үшін +1 ұпай</span>
+                </div>
+                <p class="font-bold text-amber-300 text-xl md:text-2xl leading-relaxed text-center my-4">${item.q}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+            `;
+            
+            item.options.forEach((opt, optIdx) => {
+                let btnStyle = "bg-slate-800 hover:bg-slate-700 text-white border-amber-500/40 shadow-lg";
+                let isDisabled = answeredOption !== undefined ? "disabled" : "";
+
+                if (answeredOption !== undefined) {
+                    if (optIdx === item.answer) {
+                        btnStyle = "bg-emerald-600 text-white border-emerald-300 font-black shadow-xl ring-2 ring-emerald-400";
+                    } else if (optIdx === answeredOption && answeredOption !== item.answer) {
+                        btnStyle = "bg-rose-600 text-white border-rose-300 font-black shadow-xl ring-2 ring-rose-400";
+                    } else {
+                        btnStyle = "bg-slate-950 text-slate-400 opacity-40 border-slate-800";
+                    }
+                }
+
+                html += `<button ${isDisabled} onclick="window.checkQuizAnswer(${window.currentQuizIdx}, ${optIdx})" class="text-center px-6 py-5 rounded-2xl text-lg md:text-xl font-bold border-2 transition-all duration-200 flex items-center justify-between shadow-md hover:scale-[1.02] ${btnStyle}">
+                    <span class="text-white drop-shadow-md text-left">${opt}</span>
+                    ${answeredOption !== undefined && optIdx === item.answer ? '<i class="fa-solid fa-circle-check text-2xl text-white ml-2"></i>' : ''}
+                    ${answeredOption !== undefined && optIdx === answeredOption && answeredOption !== item.answer ? '<i class="fa-solid fa-circle-xmark text-2xl text-white ml-2"></i>' : ''}
+                </button>`;
+            });
+            
+            html += `</div>`;
+            
+            if (answeredOption !== undefined) {
+                const isCorrect = answeredOption === item.answer;
+                html += `<div class="p-4 rounded-xl text-center font-bold text-lg md:text-xl mt-4 ${isCorrect ? 'bg-emerald-950/90 text-emerald-300 border-2 border-emerald-500/50' : 'bg-rose-950/90 text-rose-300 border-2 border-rose-500/50'}">
+                    ${isCorrect ? '✓ Тамаша! Жауабыңыз дұрыс!' : `✗ Қате! Дұрыс жауап: ${item.options[item.answer]}`}
+                </div>`;
+            }
+
+            html += `
+                <div class="flex justify-between items-center pt-5 border-t border-amber-500/30 mt-6">
+                    <button onclick="window.prevQuizStep()" ${window.currentQuizIdx === 0 ? 'disabled class="px-5 py-3 bg-slate-800 text-slate-600 rounded-xl cursor-not-allowed text-base font-semibold"' : 'class="px-5 py-3 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/50 rounded-xl text-base font-bold transition shadow-md"'}>
+                        <i class="fa-solid fa-arrow-left mr-2"></i> Алдыңғы
+                    </button>
+                    <span class="text-xs md:text-sm text-amber-200/80 font-medium hidden sm:inline">Сұрақты таңдап, келесіге өтіңіз</span>
+                    <button onclick="window.nextQuizStep()" class="px-6 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold rounded-xl text-base transition shadow-lg">
+                        ${window.currentQuizIdx === quizData.length - 1 ? 'Аяқтау <i class="fa-solid fa-check ml-1"></i>' : 'Келесі <i class="fa-solid fa-arrow-right ml-2"></i>'}
+                    </button>
+                </div>
+            `;
+
+            card.innerHTML = html;
+            container.appendChild(card);
+        };
+
+        window.checkQuizAnswer = function(qIdx, optIdx) {
+            if (window.userQuizAnswers[qIdx] !== undefined) return;
+            window.userQuizAnswers[qIdx] = optIdx;
+
+            const item = quizData[qIdx];
+            if (optIdx === item.answer) {
+                window.playAudioEffect('correct');
+                window.userScore += 1;
+                document.getElementById('user-score').innerText = window.userScore;
+            } else {
+                window.playAudioEffect('wrong');
+            }
+            window.renderQuiz();
+        };
+
+        window.nextQuizStep = function() {
+            window.playAudioEffect('nav');
+            if (window.currentQuizIdx < quizData.length - 1) {
+                window.currentQuizIdx++;
+                window.renderQuiz();
+            } else {
+                document.getElementById('final-score-val').innerText = window.userScore;
+                window.goToStage(9);
+            }
+        };
+
+        window.prevQuizStep = function() {
+            window.playAudioEffect('nav');
+            if (window.currentQuizIdx > 0) {
+                window.currentQuizIdx--;
+                window.renderQuiz();
+            }
+        };
+
+        // Drag & Drop Map Logic for Stage 6
+        let selectedChip = null;
+        window.clickSelectRegion = function(regionName) {
+            selectedChip = regionName;
+            window.playAudioEffect('nav');
+            const feedback = document.getElementById('map-task-feedback');
+            feedback.classList.remove('hidden');
+            feedback.className = 'text-center text-sm font-bold text-amber-300 mt-2';
+            feedback.innerText = `"${regionName.toUpperCase()}" таңдалды. Енді картадағы тиісті орынды басыңыз.`;
+        };
+
+        window.allowDrop = function(ev) {
+            ev.preventDefault();
+        };
+
+        window.dragStart = function(ev) {
+            ev.dataTransfer.setData("text", ev.target.getAttribute('data-region'));
+        };
+
+        window.dropRegion = function(ev, targetRegion) {
+            ev.preventDefault();
+            const draggedRegion = ev.dataTransfer ? ev.dataTransfer.getData("text") : selectedChip;
+            window.evaluateMapPlacement(draggedRegion, targetRegion);
+        };
+
+        window.evaluateMapPlacement = function(draggedRegion, targetRegion) {
+            const feedback = document.getElementById('map-task-feedback');
+            feedback.classList.remove('hidden');
+
+            if (draggedRegion === targetRegion) {
+                window.playAudioEffect('correct');
+                feedback.className = 'text-center text-sm font-bold text-emerald-400 mt-2';
+                feedback.innerText = `✓ Дұрыс! ${targetRegion.toUpperCase()} орнына дәл орналастырылды!`;
+
+                const slot = document.getElementById(`target-slot-${targetRegion}`);
+                if (slot) {
+                    slot.innerText = targetRegion.toUpperCase();
+                    slot.className = "text-base font-extrabold text-white bg-slate-900/90 px-3 py-1.5 rounded-xl border border-amber-400 shadow-md";
+                }
+                const chip = document.getElementById(`region-${draggedRegion}`);
+                if (chip) {
+                    chip.classList.add('opacity-40', 'pointer-events-none');
+                }
+            } else {
+                window.playAudioEffect('wrong');
+                feedback.className = 'text-center text-sm font-bold text-rose-400 mt-2';
+                feedback.innerText = '✗ Қате! Қайтадан байқап көріңіз.';
+            }
+            selectedChip = null;
+        };
+
+        // Stage 5 Image Match Logic
+        window.checkImageMatch = function() {
+            const val1 = document.getElementById('img-match-1').value;
+            const val2 = document.getElementById('img-match-2').value;
+            const val3 = document.getElementById('img-match-3').value;
+            const resultEl = document.getElementById('img-match-result');
+            resultEl.classList.remove('hidden');
+
+            if (val1 === 'naiman' && val2 === 'kereit' && val3 === 'jalair') {
+                window.playAudioEffect('correct');
+                resultEl.className = 'mt-3 font-bold text-base text-emerald-400';
+                resultEl.innerText = '✓ Өте тамаша! Барлық суреттер дұрыс сәйкестендірілді!';
+            } else {
+                window.playAudioEffect('wrong');
+                resultEl.className = 'mt-3 font-bold text-base text-rose-400';
+                resultEl.innerText = '✗ Қателіктер бар. Тағы бір рет тексеріп көріңіз.';
+            }
+        };
+
+        // Stage 7 Venn Diagram Logic
+        window.vennAnswers = {
+            "1": "naiman",
+            "2": "kereit",
+            "3": "jalair",
+            "4": "common",
+            "5": "naiman",
+            "6": "common"
+        };
+
+        // Reflection vote counters
+        window.reflectionCounts = {
+            'Өте қызықты өтті': 0,
+            'Барлығын түсіндім': 0,
+            'Қайталау керек': 0
+        };
+
+        window.giveReflection = function(feeling) {
+            window.playAudioEffect('feedback');
+            
+            // Increment count for selected option
+            if (window.reflectionCounts[feeling] !== undefined) {
+                window.reflectionCounts[feeling] += 1;
+            }
+
+            // Update DOM counters
+            document.getElementById('count-interesting').innerText = window.reflectionCounts['Өте қызықты өтті'];
+            document.getElementById('count-understood').innerText = window.reflectionCounts['Барлығын түсіндім'];
+            document.getElementById('count-repeat').innerText = window.reflectionCounts['Қайталау керек'];
+
+            const feedbackBox = document.getElementById('reflection-feedback');
+            feedbackBox.classList.remove('hidden');
+            feedbackBox.innerText = `Кері байланысыңыз үшін рақмет! Таңдауыңыз: "${feeling}" (${window.reflectionCounts[feeling]} оқушы). Сабақ аяқталды!`;
+        };
+    </script>
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #0c1829;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.22), transparent 70%),
+                radial-gradient(circle at 10% 20%, rgba(245, 158, 11, 0.12), transparent 50%),
+                radial-gradient(circle at 90% 80%, rgba(14, 165, 233, 0.18), transparent 50%);
+            color: #FDE047;
+            background-attachment: fixed;
+        }
+        .font-title {
+            font-family: 'Cinzel', serif;
+        }
+        .stage-2-bg-custom {
+            background-image: url('assets/media_01.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .glass-card {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        @keyframes pulse-slow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-pulse-slow {
+            animation: pulse-slow 3s infinite ease-in-out;
+        }
+    </style>
+<style>*{box-sizing:border-box;border:0 solid #334155}body{margin:0}h1,h2,h3,h4,p{margin:0}button,select,textarea{font:inherit}button{cursor:pointer}button:disabled{cursor:default}img,video{display:block;max-width:100%}textarea{resize:vertical}button:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:3px solid #38bdf8;outline-offset:3px}[class*="space-y-"]>*+*{margin-top:var(--space-y,1rem)}
+.absolute{position:absolute}
+.backdrop-blur-md{backdrop-filter:blur(12px)}
+.bg-amber-500{background-color:#f59e0b}
+.bg-amber-500\/20{background-color:rgba(245,158,11,0.2)}
+.bg-amber-500\/90{background-color:rgba(245,158,11,0.9)}
+.bg-amber-600{background-color:#d97706}
+.bg-amber-700{background-color:#b45309}
+.bg-amber-950\/70{background-color:rgba(69,26,3,0.7)}
+.bg-blue-600{background-color:#2563eb}
+.bg-blue-950\/60{background-color:rgba(23,37,84,0.6)}
+.bg-center{background-position:center}
+.bg-cover{background-size:cover}
+.bg-emerald-600{background-color:#059669}
+.bg-emerald-600\/80{background-color:rgba(5,150,105,0.8)}
+.bg-emerald-900{background-color:#064e3b}
+.bg-emerald-950\/60{background-color:rgba(2,44,34,0.6)}
+.bg-emerald-950\/80{background-color:rgba(2,44,34,0.8)}
+.bg-emerald-950\/90{background-color:rgba(2,44,34,0.9)}
+.bg-gradient-to-r{background-image:linear-gradient(to right,var(--from,#f59e0b),var(--to,#d97706))}
+.bg-gradient-to-tr{background-image:linear-gradient(to top right,var(--from,#f59e0b),var(--to,#38bdf8))}
+.bg-no-repeat{background-repeat:no-repeat}
+.bg-rose-600{background-color:#e11d48}
+.bg-rose-600\/80{background-color:rgba(225,29,72,0.8)}
+.bg-rose-900{background-color:#881337}
+.bg-rose-950\/90{background-color:rgba(76,5,25,0.9)}
+.bg-slate-800{background-color:#1e293b}
+.bg-slate-900\/80{background-color:rgba(15,23,42,0.8)}
+.bg-slate-900\/90{background-color:rgba(15,23,42,0.9)}
+.bg-slate-900\/95{background-color:rgba(15,23,42,0.95)}
+.bg-slate-950{background-color:#020617}
+.bg-transparent{background-color:transparent}
+.border{border-width:1px}
+.border-2{border-width:2px}
+.border-4{border-width:4px}
+.border-amber-300{border-color:#fcd34d}
+.border-amber-400\/30{border-color:rgba(251,191,36,0.3)}
+.border-amber-400\/40{border-color:rgba(251,191,36,0.4)}
+.border-amber-500{border-color:#f59e0b}
+.border-amber-500\/20{border-color:rgba(245,158,11,0.2)}
+.border-amber-500\/30{border-color:rgba(245,158,11,0.3)}
+.border-amber-500\/40{border-color:rgba(245,158,11,0.4)}
+.border-amber-500\/50{border-color:rgba(245,158,11,0.5)}
+.border-amber-500\/60{border-color:rgba(245,158,11,0.6)}
+.border-b{border-bottom-width:1px}
+.border-blue-300{border-color:#93c5fd}
+.border-blue-400\/30{border-color:rgba(96,165,250,0.3)}
+.border-blue-400\/40{border-color:rgba(96,165,250,0.4)}
+.border-blue-500\/60{border-color:rgba(59,130,246,0.6)}
+.border-dashed{border-style:dashed}
+.border-emerald-300{border-color:#6ee7b7}
+.border-emerald-400{border-color:#34d399}
+.border-emerald-400\/30{border-color:rgba(52,211,153,0.3)}
+.border-emerald-400\/40{border-color:rgba(52,211,153,0.4)}
+.border-emerald-500\/50{border-color:rgba(16,185,129,0.5)}
+.border-emerald-500\/60{border-color:rgba(16,185,129,0.6)}
+.border-rose-300{border-color:#fda4af}
+.border-rose-400{border-color:#fb7185}
+.border-rose-500\/50{border-color:rgba(244,63,94,0.5)}
+.border-slate-800{border-color:#1e293b}
+.border-t{border-top-width:1px}
+.cursor-grab{cursor:grab}
+.cursor-not-allowed{cursor:not-allowed}
+.cursor-pointer{cursor:pointer}
+.duration-300{transition-duration:.3s}
+.flex{display:flex}
+.flex-col{flex-direction:column}
+.flex-grow{flex-grow:1}
+.flex-wrap{flex-wrap:wrap}
+.font-black{font-weight:900}
+.font-bold{font-weight:700}
+.font-extrabold{font-weight:800}
+.font-semibold{font-weight:600}
+.from-amber-500{--from:#f59e0b}
+.gap-1{gap:0.25rem}
+.gap-2{gap:0.5rem}
+.gap-3{gap:0.75rem}
+.gap-4{gap:1.0rem}
+.gap-6{gap:1.5rem}
+.grid{display:grid}
+.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}
+.h-10{height:2.5rem}
+.h-20{height:5.0rem}
+.h-32{height:8.0rem}
+.h-48{height:12.0rem}
+.h-64{height:16.0rem}
+.h-72{height:18.0rem}
+.h-80{height:20.0rem}
+.h-\[450px\]{height:450px}
+.h-\[480px\]{height:480px}
+.h-full{height:100%}
+.hidden{display:none}
+.inline-block{display:inline-block}
+.inset-0{inset:0}
+.items-center{align-items:center}
+.justify-between{justify-content:space-between}
+.justify-center{justify-content:center}
+.leading-relaxed{line-height:1.625}
+.leading-tight{line-height:1.25}
+.max-w-3xl{max-width:48rem}
+.max-w-4xl{max-width:56rem}
+.max-w-5xl{max-width:64rem}
+.max-w-6xl{max-width:72rem}
+.max-w-7xl{max-width:80rem}
+.max-w-md{max-width:28rem}
+.max-w-xl{max-width:36rem}
+.mb-1{margin-bottom:0.25rem}
+.mb-2{margin-bottom:0.5rem}
+.mb-4{margin-bottom:1.0rem}
+.mb-6{margin-bottom:1.5rem}
+.mb-8{margin-bottom:2.0rem}
+.min-h-\[550px\]{min-height:550px}
+.min-h-screen{min-height:100vh}
+.ml-1{margin-left:0.25rem}
+.ml-2{margin-left:0.5rem}
+.mr-1{margin-right:0.25rem}
+.mr-2{margin-right:0.5rem}
+.mt-3{margin-top:0.75rem}
+.mt-4{margin-top:1.0rem}
+.mt-6{margin-top:1.5rem}
+.mt-8{margin-top:2.0rem}
+.mx-auto{margin-left:auto;margin-right:auto}
+.my-4{margin-top:1.0rem;margin-bottom:1.0rem}
+.my-6{margin-top:1.5rem;margin-bottom:1.5rem}
+.object-cover{object-fit:cover}
+.opacity-40{opacity:0.4}
+.opacity-95{opacity:0.95}
+.overflow-hidden{overflow:hidden}
+.overflow-x-auto{overflow-x:auto}
+.p-1{padding:0.25rem}
+.p-2{padding:0.5rem}
+.p-4{padding:1.0rem}
+.p-5{padding:1.25rem}
+.p-6{padding:1.5rem}
+.p-8{padding:2.0rem}
+.pb-4{padding-bottom:1.0rem}
+.pt-4{padding-top:1.0rem}
+.pt-5{padding-top:1.25rem}
+.px-2{padding-left:0.5rem;padding-right:0.5rem}
+.px-3{padding-left:0.75rem;padding-right:0.75rem}
+.px-4{padding-left:1.0rem;padding-right:1.0rem}
+.px-5{padding-left:1.25rem;padding-right:1.25rem}
+.px-6{padding-left:1.5rem;padding-right:1.5rem}
+.px-8{padding-left:2.0rem;padding-right:2.0rem}
+.py-1{padding-top:0.25rem;padding-bottom:0.25rem}
+.py-2{padding-top:0.5rem;padding-bottom:0.5rem}
+.py-3{padding-top:0.75rem;padding-bottom:0.75rem}
+.py-4{padding-top:1.0rem;padding-bottom:1.0rem}
+.py-5{padding-top:1.25rem;padding-bottom:1.25rem}
+.relative{position:relative}
+.rounded{border-radius:.25rem}
+.rounded-2xl{border-radius:1rem}
+.rounded-3xl{border-radius:1.5rem}
+.rounded-full{border-radius:9999px}
+.rounded-lg{border-radius:.5rem}
+.rounded-xl{border-radius:.75rem}
+.shadow-2xl{box-shadow:0 10px 28px #0005}
+.shadow-inner{box-shadow:inset 0 2px 4px #0004}
+.shadow-lg{box-shadow:0 10px 28px #0005}
+.shadow-md{box-shadow:0 10px 28px #0005}
+.shadow-xl{box-shadow:0 10px 28px #0005}
+.space-y-1{--space-y:0.25rem}
+.space-y-2{--space-y:0.5rem}
+.space-y-4{--space-y:1.0rem}
+.space-y-6{--space-y:1.5rem}
+.sticky{position:sticky}
+.text-2xl{font-size:1.5rem;line-height:2rem}
+.text-3xl{font-size:1.875rem;line-height:2.25rem}
+.text-4xl{font-size:2.25rem;line-height:2.5rem}
+.text-\[11px\]{font-size:11px}
+.text-amber-200{color:#fde68a}
+.text-amber-200\/80{color:rgba(253,230,138,0.8)}
+.text-amber-300{color:#fcd34d}
+.text-amber-400{color:#fbbf24}
+.text-base{font-size:1rem;line-height:1.5rem}
+.text-blue-200{color:#bfdbfe}
+.text-blue-300{color:#93c5fd}
+.text-center{text-align:center}
+.text-emerald-200{color:#a7f3d0}
+.text-emerald-300{color:#6ee7b7}
+.text-emerald-400{color:#34d399}
+.text-left{text-align:left}
+.text-lg{font-size:1.125rem;line-height:1.75rem}
+.text-rose-300{color:#fda4af}
+.text-rose-400{color:#fb7185}
+.text-sky-200{color:#bae6fd}
+.text-sky-300{color:#7dd3fc}
+.text-sky-400{color:#38bdf8}
+.text-slate-400{color:#94a3b8}
+.text-slate-950{color:#020617}
+.text-sm{font-size:.875rem;line-height:1.25rem}
+.text-transparent{color:transparent}
+.text-white{color:white}
+.text-xl{font-size:1.25rem;line-height:1.75rem}
+.text-xs{font-size:.75rem;line-height:1rem}
+.to-amber-600{--to:#d97706}
+.to-sky-400{--to:#38bdf8}
+.top-0{top:0}
+.tracking-wider{letter-spacing:.05em}
+.transition{transition:all .18s}
+.w-10{width:2.5rem}
+.w-20{width:5.0rem}
+.w-28{width:7.0rem}
+.w-48{width:12.0rem}
+.w-full{width:100%}
+.z-10{z-index:10}
+.z-20{z-index:20}
+.z-50{z-index:50}
+.active\:cursor-grabbing:active{cursor:grabbing}
+.hover\:bg-amber-400:hover{background-color:#fbbf24}
+.hover\:bg-amber-500:hover{background-color:#f59e0b}
+.hover\:bg-amber-900\/20:hover{background-color:rgba(120,53,15,0.2)}
+.hover\:bg-blue-500:hover{background-color:#3b82f6}
+.hover\:bg-blue-900\/20:hover{background-color:rgba(30,58,138,0.2)}
+.hover\:bg-emerald-500:hover{background-color:#10b981}
+.hover\:bg-emerald-600:hover{background-color:#059669}
+.hover\:bg-emerald-900\/20:hover{background-color:rgba(6,78,59,0.2)}
+.hover\:bg-rose-600:hover{background-color:#e11d48}
+.hover\:bg-slate-700:hover{background-color:#334155}
+.hover\:bg-slate-800:hover{background-color:#1e293b}
+.hover\:from-amber-600:hover{--from:#d97706}
+.hover\:scale-105:hover{transform:scale(1.05)}
+.hover\:scale-\[0\.99\]:hover{transform:scale(.99)}
+.hover\:to-amber-700:hover{--to:#b45309}
+@media(min-width:768px){.md\:-mx-12{margin-left:-3.0rem;margin-right:-3.0rem}}
+@media(min-width:768px){.md\:flex{display:flex}}
+@media(min-width:768px){.md\:flex-row{flex-direction:row}}
+@media(min-width:768px){.md\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:768px){.md\:h-80{height:20.0rem}}
+@media(min-width:768px){.md\:h-\[440px\]{height:440px}}
+@media(min-width:768px){.md\:h-\[580px\]{height:580px}}
+@media(min-width:768px){.md\:min-h-\[680px\]{min-height:680px}}
+@media(min-width:768px){.md\:p-10{padding:2.5rem}}
+@media(min-width:768px){.md\:p-6{padding:1.5rem}}
+@media(min-width:768px){.md\:p-8{padding:2.0rem}}
+@media(min-width:768px){.md\:text-2xl{font-size:1.5rem;line-height:2rem}}
+@media(min-width:768px){.md\:text-3xl{font-size:1.875rem;line-height:2.25rem}}
+@media(min-width:768px){.md\:text-4xl{font-size:2.25rem;line-height:2.5rem}}
+@media(min-width:768px){.md\:text-6xl{font-size:3.75rem;line-height:1.1}}
+@media(min-width:768px){.md\:text-base{font-size:1rem;line-height:1.5rem}}
+@media(min-width:768px){.md\:text-sm{font-size:.875rem;line-height:1.25rem}}
+@media(min-width:768px){.md\:text-xl{font-size:1.25rem;line-height:1.75rem}}
+@media(min-width:768px){.md\:w-72{width:18.0rem}}
+@media(min-width:640px){.sm\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.-translate-x-1\/2{transform:translateX(-50%)}
+.-translate-y-1\/2{translate:0 -50%}
+.backdrop-blur-xs{backdrop-filter:blur(2px)}
+.bg-amber-500{background-color:#f59e0b}
+.bg-amber-500\/20{background-color:rgba(245,158,11,0.2)}
+.bg-amber-600{background-color:#d97706}
+.bg-amber-600\/15{background-color:rgba(217,119,6,0.15)}
+.bg-amber-950\/80{background-color:rgba(69,26,3,0.8)}
+.bg-blue-600{background-color:#2563eb}
+.bg-blue-600\/15{background-color:rgba(37,99,235,0.15)}
+.bg-blue-950\/80{background-color:rgba(23,37,84,0.8)}
+.bg-emerald-600{background-color:#059669}
+.bg-emerald-600\/15{background-color:rgba(5,150,105,0.15)}
+.bg-emerald-950\/80{background-color:rgba(2,44,34,0.8)}
+.bg-emerald-950\/90{background-color:rgba(2,44,34,0.9)}
+.bg-rose-600{background-color:#e11d48}
+.bg-rose-950\/90{background-color:rgba(76,5,25,0.9)}
+.bg-slate-800{background-color:#1e293b}
+.bg-slate-900\/80{background-color:rgba(15,23,42,0.8)}
+.bg-slate-900\/90{background-color:rgba(15,23,42,0.9)}
+.bg-slate-900\/95{background-color:rgba(15,23,42,0.95)}
+.bg-slate-950{background-color:#020617}
+.bg-slate-950\/90{background-color:rgba(2,6,23,0.9)}
+.border-amber-300{border-color:#fcd34d}
+.border-amber-300\/50{border-color:rgba(252,211,77,0.5)}
+.border-amber-400{border-color:#fbbf24}
+.border-amber-400\/50{border-color:rgba(251,191,36,0.5)}
+.border-amber-500\/20{border-color:rgba(245,158,11,0.2)}
+.border-amber-500\/30{border-color:rgba(245,158,11,0.3)}
+.border-amber-500\/40{border-color:rgba(245,158,11,0.4)}
+.border-amber-500\/50{border-color:rgba(245,158,11,0.5)}
+.border-amber-500\/60{border-color:rgba(245,158,11,0.6)}
+.border-blue-300{border-color:#93c5fd}
+.border-blue-400\/50{border-color:rgba(96,165,250,0.5)}
+.border-blue-500\/40{border-color:rgba(59,130,246,0.4)}
+.border-blue-500\/60{border-color:rgba(59,130,246,0.6)}
+.border-emerald-300{border-color:#6ee7b7}
+.border-emerald-400\/50{border-color:rgba(52,211,153,0.5)}
+.border-emerald-500\/40{border-color:rgba(16,185,129,0.4)}
+.border-emerald-500\/50{border-color:rgba(16,185,129,0.5)}
+.border-emerald-500\/60{border-color:rgba(16,185,129,0.6)}
+.border-rose-300{border-color:#fda4af}
+.border-rose-500\/50{border-color:rgba(244,63,94,0.5)}
+.border-sky-300\/60{border-color:rgba(125,211,252,0.6)}
+.border-slate-800{border-color:#1e293b}
+.bottom-2{bottom:0.5rem}
+.drop-shadow-md{filter:drop-shadow(0 2px 2px #0005)}
+.font-medium{font-weight:500}
+.gap-1{gap:0.25rem}
+.gap-2{gap:0.5rem}
+.gap-3{gap:0.75rem}
+.gap-4{gap:1.0rem}
+.gap-6{gap:1.5rem}
+.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}
+.h-10{height:2.5rem}
+.h-20{height:5.0rem}
+.h-32{height:8.0rem}
+.h-48{height:12.0rem}
+.h-64{height:16.0rem}
+.h-\[380px\]{height:380px}
+.h-\[450px\]{height:450px}
+.h-\[480px\]{height:480px}
+.items-start{align-items:flex-start}
+.justify-end{justify-content:flex-end}
+.justify-start{justify-content:flex-start}
+.left-1\/2{left:50.0%}
+.left-\[10\%\]{left:10%}
+.max-h-20{max-height:5.0rem}
+.max-h-32{max-height:8.0rem}
+.mb-2{margin-bottom:0.5rem}
+.mb-4{margin-bottom:1.0rem}
+.mb-6{margin-bottom:1.5rem}
+.min-h-\[460px\]{min-height:460px}
+.min-h-\[550px\]{min-height:550px}
+.ml-1{margin-left:0.25rem}
+.ml-2{margin-left:0.5rem}
+.mr-2{margin-right:0.5rem}
+.mt-1{margin-top:0.25rem}
+.mt-2{margin-top:0.5rem}
+.mt-3{margin-top:0.75rem}
+.mt-4{margin-top:1.0rem}
+.mt-6{margin-top:1.5rem}
+.mt-8{margin-top:2.0rem}
+.my-2{margin-top:0.5rem;margin-bottom:0.5rem}
+.my-4{margin-top:1.0rem;margin-bottom:1.0rem}
+.my-6{margin-top:1.5rem;margin-bottom:1.5rem}
+.overflow-y-auto{overflow-y:auto}
+.p-2{padding:0.5rem}
+.p-3{padding:0.75rem}
+.p-4{padding:1.0rem}
+.p-5{padding:1.25rem}
+.p-6{padding:1.5rem}
+.pb-1{padding-bottom:0.25rem}
+.pb-4{padding-bottom:1.0rem}
+.pointer-events-none{pointer-events:none}
+.pt-1{padding-top:0.25rem}
+.pt-4{padding-top:1.0rem}
+.pt-5{padding-top:1.25rem}
+.pt-6{padding-top:1.5rem}
+.px-3{padding-left:0.75rem;padding-right:0.75rem}
+.px-4{padding-left:1.0rem;padding-right:1.0rem}
+.px-5{padding-left:1.25rem;padding-right:1.25rem}
+.px-6{padding-left:1.5rem;padding-right:1.5rem}
+.px-8{padding-left:2.0rem;padding-right:2.0rem}
+.py-0{padding-top:0.0rem;padding-bottom:0.0rem}
+.py-1{padding-top:0.25rem;padding-bottom:0.25rem}
+.py-2{padding-top:0.5rem;padding-bottom:0.5rem}
+.py-3{padding-top:0.75rem;padding-bottom:0.75rem}
+.py-4{padding-top:1.0rem;padding-bottom:1.0rem}
+.py-5{padding-top:1.25rem;padding-bottom:1.25rem}
+.right-\[10\%\]{right:10%}
+.ring-2{outline:2px solid #34d399}
+.ring-rose-400{outline-color:#fb7185}
+.space-y-0{--space-y:0.0rem}
+.space-y-1{--space-y:0.25rem}
+.space-y-4{--space-y:1.0rem}
+.space-y-6{--space-y:1.5rem}
+.text-amber-100{color:#fef3c7}
+.text-amber-200{color:#fde68a}
+.text-amber-200\/60{color:rgba(253,230,138,0.6)}
+.text-amber-200\/80{color:rgba(253,230,138,0.8)}
+.text-amber-200\/90{color:rgba(253,230,138,0.9)}
+.text-amber-300{color:#fcd34d}
+.text-amber-400{color:#fbbf24}
+.text-blue-100{color:#dbeafe}
+.text-blue-200{color:#bfdbfe}
+.text-blue-400{color:#60a5fa}
+.text-emerald-100{color:#d1fae5}
+.text-emerald-200{color:#a7f3d0}
+.text-emerald-300{color:#6ee7b7}
+.text-emerald-400{color:#34d399}
+.text-right{text-align:right}
+.text-rose-300{color:#fda4af}
+.text-rose-400{color:#fb7185}
+.text-sky-100{color:#e0f2fe}
+.text-sky-200{color:#bae6fd}
+.text-sky-300{color:#7dd3fc}
+.text-sky-400{color:#38bdf8}
+.text-slate-400{color:#94a3b8}
+.text-slate-950{color:#020617}
+.top-0{top:0.0rem}
+.top-1\/2{top:50.0%}
+.top-2{top:0.5rem}
+.transition-all{transition:all .2s}
+.w-10{width:2.5rem}
+.w-20{width:5.0rem}
+.w-28{width:7.0rem}
+.w-32{width:8.0rem}
+.w-48{width:12.0rem}
+.whitespace-nowrap{white-space:nowrap}
+.focus\:ring-2{outline:2px solid #34d399}
+.hover\:bg-amber-400:hover{background-color:#fbbf24}
+.hover\:bg-amber-500:hover{background-color:#f59e0b}
+.hover\:bg-blue-500:hover{background-color:#3b82f6}
+.hover\:bg-emerald-500:hover{background-color:#10b981}
+.hover\:bg-slate-700:hover{background-color:#334155}
+.hover\:bg-slate-800:hover{background-color:#1e293b}
+.hover\:scale-\[0\.99\]:hover{transform:scale(0.99)}
+.hover\:scale-\[1\.02\]:hover{transform:scale(1.02)}
+@media(min-width:768px){.md\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:768px){.md\:h-64{height:16.0rem}}
+@media(min-width:768px){.md\:h-80{height:20.0rem}}
+@media(min-width:768px){.md\:h-\[420px\]{height:420px}}
+@media(min-width:768px){.md\:h-\[460px\]{height:460px}}
+@media(min-width:768px){.md\:h-\[580px\]{height:580px}}
+@media(min-width:768px){.md\:left-\[22\%\]{left:22%}}
+@media(min-width:768px){.md\:min-h-\[520px\]{min-height:520px}}
+@media(min-width:768px){.md\:min-h-\[680px\]{min-height:680px}}
+@media(min-width:768px){.md\:p-10{padding:2.5rem}}
+@media(min-width:768px){.md\:p-6{padding:1.5rem}}
+@media(min-width:768px){.md\:p-8{padding:2.0rem}}
+@media(min-width:768px){.md\:right-\[22\%\]{right:22%}}
+@media(min-width:768px){.md\:w-1\/3{width:33.33333333333333%}}
+@media(min-width:768px){.md\:w-2\/3{width:66.66666666666666%}}
+@media(min-width:768px){.md\:w-64{width:16.0rem}}
+@media(min-width:768px){.md\:w-auto{width:auto}}
+@media(min-width:640px){.sm\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(min-width:640px){.sm\:h-36{height:9.0rem}}
+@media(min-width:640px){.sm\:h-60{height:15.0rem}}
+@media(min-width:640px){.sm\:left-\[18\%\]{left:18%}}
+@media(min-width:640px){.sm\:right-\[18\%\]{right:18%}}
+@media(min-width:640px){.sm\:w-36{width:9.0rem}}
+@media(min-width:640px){.sm\:w-60{width:15.0rem}}
+.fa-arrow-left::before{content:"←"}.fa-solid{font-style:normal;display:inline-block}
+.fa-arrow-right::before{content:"→"}.fa-solid{font-style:normal;display:inline-block}
+.fa-crown::before{content:"♛"}.fa-solid{font-style:normal;display:inline-block}
+.fa-trophy::before{content:"★"}.fa-solid{font-style:normal;display:inline-block}
+.fa-video::before{content:"▶"}.fa-solid{font-style:normal;display:inline-block}
+.fa-images::before{content:"▧"}.fa-solid{font-style:normal;display:inline-block}
+.fa-map-location-dot::before{content:"⌖"}.fa-solid{font-style:normal;display:inline-block}
+.fa-clipboard-question::before{content:"?"}.fa-solid{font-style:normal;display:inline-block}
+.fa-circle-nodes::before{content:"◉"}.fa-solid{font-style:normal;display:inline-block}
+.fa-shield-halved::before{content:"◆"}.fa-solid{font-style:normal;display:inline-block}
+.fa-handshake::before{content:"◇"}.fa-solid{font-style:normal;display:inline-block}
+.fa-award::before{content:"★"}.fa-solid{font-style:normal;display:inline-block}
+.fa-comments::before{content:"☏"}.fa-solid{font-style:normal;display:inline-block}
+.fa-circle-check::before{content:"✓"}.fa-solid{font-style:normal;display:inline-block}
+.fa-check::before{content:"✓"}.fa-solid{font-style:normal;display:inline-block}
+.fa-circle-xmark::before{content:"✕"}.fa-solid{font-style:normal;display:inline-block}
+.fa-circle-question::before{content:"?"}.fa-solid{font-style:normal;display:inline-block}
+.fa-circle-exclamation::before{content:"!"}.fa-solid{font-style:normal;display:inline-block}
+.fa-rotate-right::before{content:"↻"}.fa-solid{font-style:normal;display:inline-block}</style></head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- Header Navigation -->
+    <header class="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-amber-500/30">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-500 to-sky-400 flex items-center justify-center text-slate-950 font-bold text-xl shadow-lg">
+                    <i class="fa-solid font-bold fa-crown"></i>
+                </div>
+                <div>
+                    <h1 class="font-title font-bold text-amber-300 text-sm md:text-base leading-tight">ҰЛЫ ДАЛА ҚҰПИЯСЫ</h1>
+                    <p class="text-xs text-sky-200">Найман, Керейт, Жалайыр мемлекеттері</p>
+                </div>
+            </div>
+
+            <!-- Stage Navigation Pills -->
+            <div id="stage-pills" class="hidden md:flex items-center gap-1 overflow-x-auto py-1"></div>
+
+            <div class="flex items-center gap-2">
+                <span id="score-display" class="px-3 py-1 bg-amber-500/20 border border-amber-500/50 text-amber-300 rounded-full text-xs font-semibold flex items-center gap-2">
+                    <i class="fa-solid fa-trophy text-amber-400"></i> Ұпай: <span id="user-score">0</span> / 10
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dynamic Content Container -->
+    <main class="flex-grow max-w-6xl w-full mx-auto p-4 md:p-6 my-4">
+        
+        <!-- STAGE 1: TITUL -->
+        <section id="stage-1" class="stage-content space-y-6">
+            <div class="glass-card rounded-2xl p-6 md:p-10 text-center relative overflow-hidden border-2 border-amber-500/50 shadow-2xl">
+                <div class="w-full max-w-3xl mx-auto h-64 md:h-80 rounded-2xl overflow-hidden mb-6 border-2 border-amber-500/40 shadow-2xl">
+                    <img src="assets/media_02.jpg" alt="Найман, Керейт, Жалайыр" class="w-full h-full object-cover">
+                </div>
+
+                <h1 class="font-title text-4xl md:text-6xl font-black text-amber-300 tracking-wider mb-4">
+                    НАЙМАН, КЕРЕЙТ, ЖАЛАЙЫР
+                </h1>
+                
+                <h2 class="text-lg md:text-2xl font-bold text-sky-200 mb-6">
+                    Үш тайпа – үш тағдыр – бір тарих
+                </h2>
+
+                <button onclick="window.goToStage(2)" class="px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-extrabold rounded-xl shadow-lg transition text-lg flex items-center justify-center gap-3 mx-auto">
+                    <span>Сабақты бастау</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- STAGE 2: FULLSCREEN IMAGE PAGE -->
+        <section id="stage-2" class="stage-content hidden space-y-6">
+            <div class="px-4 py-2">
+                <div class="stage-2-bg-custom min-h-[550px] md:min-h-[680px] w-full rounded-3xl p-6 relative overflow-hidden border-4 border-amber-500/60 shadow-2xl flex flex-col justify-between max-w-5xl mx-auto transform transition duration-300 hover:scale-[0.99]">
+                    <div class="flex justify-between items-center z-10 w-full">
+                        <button onclick="window.goToStage(1)" class="px-4 py-2 bg-slate-900/80 text-amber-300 border border-amber-500/40 rounded-lg hover:bg-slate-800">
+                            <i class="fa-solid fa-arrow-left mr-2"></i>Артқа
+                        </button>
+                        <button onclick="window.goToStage(3)" class="px-6 py-3 bg-amber-500 text-slate-950 font-bold rounded-xl hover:bg-amber-400 shadow-lg">
+                            Келесі бетке өту <i class="fa-solid fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- STAGE 3: PURE FULLSCREEN IMAGE PAGE -->
+        <section id="stage-3" class="stage-content hidden">
+            <div class="px-4 py-2">
+                <div class="w-full max-w-4xl mx-auto glass-card rounded-3xl p-6 border-2 border-amber-500/60 shadow-2xl flex flex-col items-center justify-between gap-6">
+                    <div class="w-full h-[450px] md:h-[580px] rounded-2xl overflow-hidden border-2 border-amber-500/40 shadow-inner bg-slate-950 flex items-center justify-center">
+                        <img src="assets/media_03.jpg" alt="3-бет суреті" class="w-full h-full object-cover">
+                    </div>
+                    
+                    <div class="flex justify-between items-center w-full">
+                        <button onclick="window.goToStage(2)" class="px-5 py-2.5 bg-slate-900/80 text-amber-300 border border-amber-500/40 rounded-xl hover:bg-slate-800 transition">
+                            <i class="fa-solid fa-arrow-left mr-2"></i>Артқа
+                        </button>
+                        <button onclick="window.goToStage(4)" class="px-6 py-3 bg-amber-500 text-slate-950 font-bold rounded-xl hover:bg-amber-400 shadow-lg transition">
+                            Келесі кезеңге өту <i class="fa-solid fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- STAGE 4: VIDEO PLAYER -->
+        <section id="stage-4" class="stage-content hidden space-y-6">
+            <div class="glass-card rounded-2xl p-6 md:p-8 border-2 border-amber-500/40 shadow-xl">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/50 flex items-center justify-center text-amber-300 font-bold text-lg">
+                        <i class="fa-solid fa-video"></i>
+                    </div>
+                    <h2 class="text-2xl md:text-3xl font-bold text-amber-300 font-title">4-Кезең: Тарихи Бейнематериал</h2>
+                </div>
+
+                <div class="w-full h-[480px] md:h-[580px] bg-slate-950 rounded-2xl overflow-hidden border-2 border-amber-500/50 shadow-2xl relative flex items-center justify-center">
+                    <video controls autoplay class="w-full h-full object-cover">
+                        <source src="assets/media_04.mp4" type="video/mp4">
+                        Бейнені көрсету мүмкін емес.
+                    </video>
+                </div>
+
+                <div class="flex justify-between items-center mt-8 pt-4 border-t border-amber-500/20">
+                    <button onclick="window.goToStage(3)" class="px-5 py-2.5 bg-slate-900/80 text-amber-300 border border-amber-500/40 rounded-xl hover:bg-slate-800 transition">
+                        <i class="fa-solid fa-arrow-left mr-2"></i>Артқа
+                    </button>
+                    <button onclick="window.goToStage(5)" class="px-6 py-3 bg-amber-500 text-slate-950 font-bold rounded-xl hover:bg-amber-400 shadow-lg transition">
+                        Келесі кезеңге өту <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- STAGE 5: MATCHING MISSION WITH IMAGES -->
+        <section id="stage-5" class="stage-content hidden space-y-6">
+            <div class="glass-card rounded-2xl p-6 border-2 border-amber-500/40 shadow-xl">
+                <h2 class="text-2xl font-bold text-amber-300 mb-2 flex items-center gap-2 font-title">
+                    <i class="fa-solid fa-images text-sky-400"></i> 5-Кезең: Суреттерді Сәйкестендіру Тапсырмасы
+                </h2>
+                <p class="text-sky-200 mb-6 text-sm">Төмендегі тарихи суреттер қай мемлекетке/тайпаға тиесілі екенін дұрыс анықтаңыз:</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Image Card 1 -->
+                    <div class="bg-slate-900/90 p-4 rounded-2xl border border-amber-500/40 flex flex-col items-center gap-4 shadow-lg">
+                        <div class="w-full h-48 rounded-xl overflow-hidden border border-amber-500/40 shadow-inner bg-slate-950">
+                            <img src="assets/media_05.jpg" alt="Сурет 1" class="w-full h-full object-cover">
+                        </div>
+                        <p class="text-xs text-amber-200/90 font-semibold text-center">1-сурет: Алтай мен Орхон алқабының өңірі</p>
+                        <select id="img-match-1" class="w-full p-3 bg-slate-800 text-amber-200 font-bold border border-amber-500/50 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                            <option value="">Тайпаны таңдаңыз...</option>
+                            <option value="naiman">Найман мемлекеті</option>
+                            <option value="kereit">Керейт хандығы</option>
+                            <option value="jalair">Жалайыр одағы</option>
+                        </select>
+                    </div>
+
+                    <!-- Image Card 2 -->
+                    <div class="bg-slate-900/90 p-4 rounded-2xl border border-amber-500/40 flex flex-col items-center gap-4 shadow-lg">
+                        <div class="w-full h-48 rounded-xl overflow-hidden border border-amber-500/40 shadow-inner bg-slate-950">
+                            <img src="assets/media_06.jpg" alt="Сурет 2" class="w-full h-full object-cover">
+                        </div>
+                        <p class="text-xs text-amber-200/90 font-semibold text-center">2-сурет: Торы хан мен Битөбе астанасы</p>
+                        <select id="img-match-2" class="w-full p-3 bg-slate-800 text-amber-200 font-bold border border-amber-500/50 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                            <option value="">Тайпаны таңдаңыз...</option>
+                            <option value="naiman">Найман мемлекеті</option>
+                            <option value="kereit">Керейт хандығы</option>
+                            <option value="jalair">Жалайыр одағы</option>
+                        </select>
+                    </div>
+
+                    <!-- Image Card 3 -->
+                    <div class="bg-slate-900/90 p-4 rounded-2xl border border-amber-500/40 flex flex-col items-center gap-4 shadow-lg">
+                        <div class="w-full h-48 rounded-xl overflow-hidden border border-amber-500/40 shadow-inner bg-slate-950">
+                            <img src="assets/media_07.jpg" alt="Сурет 3" class="w-full h-full object-cover">
+                        </div>
+                        <p class="text-xs text-amber-200/90 font-semibold text-center">3-сурет: Жамұқа және 13 тармақ тайпалары</p>
+                        <select id="img-match-3" class="w-full p-3 bg-slate-800 text-amber-200 font-bold border border-amber-500/50 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                            <option value="">Тайпаны таңдаңыз...</option>
+                            <option value="naiman">Найман мемлекеті</option>
+                            <option value="kereit">Керейт хандығы</option>
+                            <option value="jalair">Жалайыр одағы</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="text-center mt-6">
+                    <button onclick="window.checkImageMatch()" class="px-8 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl text-base shadow-lg transition">
+                        Сәйкестікті Тексеру
+                    </button>
+                    <p id="img-match-result" class="mt-4 font-bold text-base hidden p-3 rounded-xl max-w-md mx-auto"></p>
+                </div>
+
+                <div class="flex justify-between items-center mt-8 pt-4 border-t border-amber-500/20">
+                    <button onclick="window.goToStage(4)" class="px-5 py-2.5 bg-slate-900/80 text-amber-300 border border-amber-500/40 rounded-xl hover:bg-slate-800 transition">
+                        <i class="fa-solid fa-arrow-left mr-2"></i>Артқа
+                    </button>
+                    <button onclick="window.goToStage(6)" class="px-6 py-3 bg-amber-500 text-slate-950 font-bold rounded-xl hover:bg-amber-400 shadow-lg transition">
+                        Келесі кезеңге өту <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- STAGE 6: INTERACTIVE MAP TASK WITH TARGET MAP -->
+        <section id="stage-6" class="stage-content hidden space-y-6">
+            <div class="glass-card rounded-2xl p-6 border-2 border-amber-500/40 shadow-xl">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/50 flex items-center justify-center text-amber-300 font-bold text-lg">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-amber-300 font-title">6-Кезең: Интерактивті Карта Тапсырмасы</h2>
+                        <p class="text-xs text-sky-200">Төмендегі Найман, Керейт, Жалайыр атауларын картадағы тиісті орындарына орналастырыңыз</p>
+                    </div>
+                </div>
+
+                <div class="relative w-full h-[380px] md:h-[460px] rounded-2xl overflow-hidden border-2 border-amber-500/50 bg-slate-950 shadow-2xl flex items-center justify-center my-6">
+                    <div class="absolute inset-0 bg-cover bg-no-repeat bg-center opacity-95" style="background-image: url('assets/media_08.jpg');"></div>
+
+                    <div class="absolute inset-0 p-6 flex justify-between items-center z-20">
+                        <div id="drop-zone-naiman" ondragover="allowDrop(event)" ondrop="dropRegion(event, 'naiman')" onclick="dropRegion(event, 'naiman')" class="w-28 h-32 rounded-2xl border-2 border-dashed border-blue-400/50 bg-blue-900/20 hover:bg-blue-900/40 cursor-pointer flex items-center justify-center transition">
+                            <span id="target-slot-naiman" class="text-xs font-black text-blue-200">Найман орны</span>
+                        </div>
+
+                        <div id="drop-zone-kereit" ondragover="allowDrop(event)" ondrop="dropRegion(event, 'kereit')" onclick="dropRegion(event, 'kereit')" class="w-28 h-32 rounded-2xl border-2 border-dashed border-emerald-400/50 bg-emerald-900/20 hover:bg-emerald-900/40 cursor-pointer flex items-center justify-center transition">
+                            <span id="target-slot-kereit" class="text-xs font-black text-emerald-200">Керейт орны</span>
+                        </div>
+
+                        <div id="drop-zone-jalair" ondragover="allowDrop(event)" ondrop="dropRegion(event, 'jalair')" onclick="dropRegion(event, 'jalair')" class="w-28 h-32 rounded-2xl border-2 border-dashed border-amber-400/50 bg-amber-900/20 hover:bg-amber-900/40 cursor-pointer flex items-center justify-center transition">
+                            <span id="target-slot-jalair" class="text-xs font-black text-amber-200">Жалайыр орны</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/80 p-5 rounded-xl border border-amber-500/30 space-y-4">
+                    <p class="text-sm font-bold text-amber-300">Мемлекет атаулары (сүйреңіз немесе басыңыз):</p>
+                    <div id="drag-source-container" class="flex flex-wrap gap-4 justify-center">
+                        <div draggable="true" ondragstart="dragStart(event)" id="region-naiman" data-region="naiman" onclick="clickSelectRegion('naiman')" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-extrabold rounded-xl text-sm cursor-grab shadow-lg border-2 border-blue-300 flex items-center justify-center transition transform hover:scale-105 active:cursor-grabbing">
+                            Найман
+                        </div>
+                        <div draggable="true" ondragstart="dragStart(event)" id="region-kereit" data-region="kereit" onclick="clickSelectRegion('kereit')" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-xl text-sm cursor-grab shadow-lg border-2 border-emerald-300 flex items-center justify-center transition transform hover:scale-105 active:cursor-grabbing">
+                            Керейт
+                        </div>
+                        <div draggable="true" ondragstart="dragStart(event)" id="region-jalair" data-region="jalair" onclick="clickSelectRegion('jalair')" class="px-5 py-2.5 bg-amber-600 hover:bg-amber-500 text-slate-950 font-extrabold rounded-xl text-sm cursor-grab shadow-lg border-2 border-amber-300 flex items-center justify-center transition transform hover:scale-105 active:cursor-grabbing">
+                            Жалайыр
+                        </div>
+                    </div>
+                    <p id="map-task-feedback" class="text-center text-sm font-bold hidden"></p>
+                </div>
+
+                <div class="flex justify-between items-center mt-8 pt-4 border-t border-amber-500/20">
+                    <button onclick="window.goToStage(5)" class="px-5 py-2.5 bg-slate-900/80 text-amber-300 border border-amber-500/40 rounded-xl hover:bg-slate-800 transition">
+                        <i class="fa-solid fa-arrow-left mr-2"></i>Артқа
+                    </button>
+                    <button onclick="window.goToStage(7)" class="px-6 py-3 bg-amber-500 text-slate-950 font-bold rounded-xl hover:bg-amber-400 shadow-lg transition">
+                        Келесі кезеңге өту <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- STAGE 7: VENN DIAGRAM -->
+        <section id="stage-7" class="stage-content hidden space-y-6">
+            <div class="glass-card rounded-2xl p-6 md:p-8 border-2 border-amber-500/40 shadow-xl">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/50 flex items-center justify-center text-amber-300 font-bold text-lg">
+                        <i class="fa-solid fa-circle-nodes"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-bold text-amber-300 font-title">7-Кезең: Венн Диаграммасы Тапсырмасы</h2>
+                        <p class="text-xs md:text-sm text-sky-200">Тарихи мәліметтерді қай мемлекетке немесе барлығына ортақ екенін анықтап, Венн диаграммасына орналастырыңыз.</p>
+                    </div>
+                </div>
+
+                <!-- Graphical Venn Diagram Layout -->
+                <div class="relative w-full max-w-4xl mx-auto min-h-[460px] md:min-h-[520px] bg-slate-950/90 rounded-3xl p-4 border-2 border-amber-500/30 flex flex-col items-center justify-center shadow-2xl overflow-hidden my-4">
+                    <div class="relative w-full h-[380px] md:h-[420px] flex items-center justify-center">
+                        <!-- Top-Left Circle: Найман -->
+                        <div class="absolute top-2 left-[10%] sm:left-[18%] md:left-[22%] w-48 h-48 sm:w-60 sm:h-60 md:w-64 md:h-64 rounded-full border-4 border-blue-500/60 bg-blue-600/15 backdrop-blur-xs p-4 flex flex-col items-start justify-start shadow-lg">
+                            <span class="text-blue-400 font-black text-base sm:text-lg border-b border-blue-500/40 pb-1 w-full text-center">НАЙМАН</span>
+                            <div id="venn-naiman-items" class="mt-2 text-xs space-y-1 text-blue-100 overflow-y-auto max-h-32 w-full"></div>
+                        </div>
+
+                        <!-- Top-Right Circle: Керейт -->
+                        <div class="absolute top-2 right-[10%] sm:right-[18%] md:right-[22%] w-48 h-48 sm:w-60 sm:h-60 md:w-64 md:h-64 rounded-full border-4 border-emerald-500/60 bg-emerald-600/15 backdrop-blur-xs p-4 flex flex-col items-end justify-start shadow-lg">
+                            <span class="text-emerald-400 font-black text-base sm:text-lg border-b border-emerald-500/40 pb-1 w-full text-center">КЕРЕЙТ</span>
+                            <div id="venn-kereit-items" class="mt-2 text-xs space-y-1 text-emerald-100 overflow-y-auto max-h-32 w-full text-right"></div>
+                        </div>
+
+                        <!-- Bottom Circle: Жалайыр -->
+                        <div class="absolute bottom-2 left-1/2 -translate-x-1/2 w-48 h-48 sm:w-60 sm:h-60 md:w-64 md:h-64 rounded-full border-4 border-amber-500/60 bg-amber-600/15 backdrop-blur-xs p-4 flex flex-col items-center justify-end shadow-lg">
+                            <div id="venn-jalair-items" class="mb-2 text-xs space-y-1 text-amber-100 overflow-y-auto max-h-32 w-full text-center"></div>
+                            <span class="text-amber-400 font-black text-base sm:text-lg border-t border-amber-500/40 pt-1 w-full text-center">ЖАЛАЙЫР</span>
+                        </div>
+
+                        <!-- Center Intersection: Ортақ сипаттар -->
+                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 sm:w-36 sm:h-36 rounded-full border-2 border-dashed border-sky-300/60 bg-slate-900/90 shadow-2xl p-2 flex flex-col items-center justify-center text-center z-20">
+                            <span class="text-sky-300 font-extrabold text-xs">Барлығына Ортақ</span>
+                            <div id="venn-common-items" class="text-[10px] text-sky-100 mt-1 space-y-0.5 overflow-y-auto max-h-20"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/95 p-5 rounded-2xl border border-amber-500/40 space-y-4">
+                    <p class="text-sm font-bold text-amber-300">Мәліметті таңдап, Венн диаграммасындағы тиісті орынға тағайындаңыз:</p>
+                    
+                    <div class="flex flex-col md:flex-row items-center gap-4">
+                        <select id="venn-statement-select" class="w-full md:w-2/3 p-3 bg-slate-800 text-amber-200 font-medium border border-amber-500/40 rounded-xl text-sm">
+                            <option value="1">1. Монғолша «сегіз» ұғымын білдіреді, астанасы – Балықты</option>
+                            <option value="2">2. Астанасы Битөбе болды, Торы хан билік жүргізді</option>
+                            <option value="3">3. Орхон және Селенга өзендері аралығын мекендеді</option>
+                            <option value="4">4. Көне ұйғыр жазуын және несториандықты ұстанды</option>
+                            <option value="5">5. Соңғы ханы Күшлік Жетісу өңіріне қашты</option>
+                            <option value="6">6. Шыңғыс хан XII-XIII ғғ. толығымен өзіне бағындырды</option>
+                        </select>
+
+                        <select id="venn-category-select" class="w-full md:w-1/3 p-3 bg-slate-800 text-amber-200 font-semibold border border-amber-500/40 rounded-xl text-sm">
+                            <option value="naiman">Найман</option>
+                            <option value="kereit">Керейт</option>
+                            <option value="jalair">Жалайыр</option>
+                            <option value="common">Барлығына ортақ</option>
+                        </select>
+
+                        <button onclick="window.assignVennStatement()" class="w-full md:w-auto px-6 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold rounded-xl text-sm shadow-md transition whitespace-nowrap">
+                            Диаграммаға қосу
+                        </button>
+                    </div>
+
+                    <p id="venn-feedback" class="text-center font-bold text-sm hidden p-2 rounded-xl"></p>
+                </div>
+
+                <div class="flex justify-between items-center mt-8 pt-4 border-t border-amber-500/20">
+                    <button onclick="window.goToStage(6)" class="px-5 py-2.5 bg-slate-900/80 text-amber-300 border border-amber-500/40 rounded-xl hover:bg-slate-800 transition">
+                        <i class="fa-solid fa-arrow-left mr-2"></i>Артқа
+                    </button>
+                    <button onclick="window.goToStage(8)" class="px-6 py-3 bg-amber-500 text-slate-950 font-bold rounded-xl hover:bg-amber-400 shadow-lg transition">
+                        Тест сұрақтарына өту <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- STAGE 8: QUIZ -->
+        <section id="stage-8" class="stage-content hidden space-y-6">
+            <div id="stage-8-quiz"></div>
+        </section>
+
+        <!-- STAGE 9: RESULTS & REFLECTION -->
+        <section id="stage-9" class="stage-content hidden space-y-6">
+            <div class="glass-card rounded-2xl p-6 md:p-10 text-center border-2 border-amber-500/50 shadow-2xl space-y-6">
+                <div class="w-20 h-20 mx-auto rounded-full bg-gradient-to-tr from-amber-500 to-sky-400 flex items-center justify-center text-slate-950 font-bold text-3xl shadow-xl">
+                    <i class="fa-solid fa-award"></i>
+                </div>
+
+                <h2 class="font-title text-3xl md:text-5xl font-extrabold text-amber-300">САБАҚ АЯҚТАЛДЫ!</h2>
+
+                <div class="bg-slate-900/90 p-6 rounded-2xl border border-amber-500/40 max-w-md mx-auto">
+                    <p class="text-sky-200 text-lg font-medium">Сіздің жинаған нәтижеңіз:</p>
+                    <p class="text-4xl md:text-5xl font-black text-amber-400 my-2"><span id="final-score-val">0</span> / 10</p>
+                    <p class="text-xs text-amber-200/80">Ұлы дала тарихын меңгерудегі белсенділігіңіз үшін рамет!</p>
+                </div>
+
+                <div class="space-y-4 pt-4">
+                    <h3 class="text-xl font-bold text-amber-300 font-title">Рефлексия (Кері байланыс):</h3>
+                    <div class="flex flex-wrap justify-center gap-4">
+                        <button onclick="window.giveReflection('Өте қызықты өтті')" class="px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-md transition flex flex-col items-center">
+                            <span>😃 Өте қызықты өтті</span>
+                            <span class="text-xs font-black bg-emerald-950/80 px-3 py-0.5 rounded-full mt-1 border border-emerald-400/50"><span id="count-interesting">0</span> оқушы</span>
+                        </button>
+                        <button onclick="window.giveReflection('Барлығын түсіндім')" class="px-5 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-md transition flex flex-col items-center">
+                            <span>👍 Барлығын түсіндім</span>
+                            <span class="text-xs font-black bg-blue-950/80 px-3 py-0.5 rounded-full mt-1 border border-blue-400/50"><span id="count-understood">0</span> оқушы</span>
+                        </button>
+                        <button onclick="window.giveReflection('Қайталау керек')" class="px-5 py-3 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold rounded-xl shadow-md transition flex flex-col items-center">
+                            <span>🤔 Қайталау керек</span>
+                            <span class="text-xs font-black bg-amber-950/80 px-3 py-0.5 rounded-full mt-1 border border-amber-300/50 text-amber-200"><span id="count-repeat">0</span> оқушы</span>
+                        </button>
+                    </div>
+                    <p id="reflection-feedback" class="text-amber-300 font-bold text-sm hidden mt-4 p-3 bg-slate-900/80 rounded-xl border border-amber-500/40"></p>
+                </div>
+
+                <div class="pt-6">
+                    <button onclick="window.goToStage(1)" class="px-8 py-3.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl text-base shadow-lg transition">
+                        Қайтадан бастау <i class="fa-solid fa-rotate-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950/90 border-t border-amber-500/20 py-4 text-center text-xs text-amber-200/60">
+        <p>Ұлы дала құпиясы: Найман, Керейт, Жалайыр мемлекеттері © Интерактивті тарих сабағы</p>
+    </footer>
+
+</body>
+</html>
